@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Nomodose — Quit Snus & Smoking</title>
+    <meta
+      name="description"
+      content="Quit snus and cigarettes at your own pace. Nomodose builds a personalized taper schedule and tracks your daily use — so you can cut down gradually and quit for good."
+    />
+    <link rel="canonical" href="https://nomodose.app" />
+
+    <style>
+      :root {
+        --bg: #070a12;
+        --card: rgba(255, 255, 255, 0.06);
+        --stroke: rgba(255, 255, 255, 0.12);
+        --text: rgba(255, 255, 255, 0.9);
+        --muted: rgba(255, 255, 255, 0.68);
+        --accent: #7aa2ff;
+        --accent2: #8fffe6;
+        --shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+        --radius: 18px;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f7f8fc;
+          --card: rgba(255, 255, 255, 0.75);
+          --stroke: rgba(16, 24, 40, 0.12);
+          --text: rgba(16, 24, 40, 0.92);
+          --muted: rgba(16, 24, 40, 0.66);
+          --accent: #2b61ff;
+          --accent2: #14b8a6;
+          --shadow: 0 18px 50px rgba(16, 24, 40, 0.12);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: radial-gradient(1200px 600px at 20% -10%, rgba(122, 162, 255, 0.35), transparent 55%),
+          radial-gradient(900px 520px at 80% 0%, rgba(143, 255, 230, 0.22), transparent 50%),
+          radial-gradient(900px 700px at 50% 110%, rgba(122, 162, 255, 0.12), transparent 55%),
+          var(--bg);
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+        line-height: 1.5;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .container {
+        width: min(1100px, calc(100% - 48px));
+        margin: 0 auto;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        background: color-mix(in srgb, var(--bg) 60%, transparent);
+        border-bottom: 1px solid var(--stroke);
+      }
+
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 0;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 650;
+        letter-spacing: 0.2px;
+      }
+
+      .logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        box-shadow: 0 10px 25px rgba(122, 162, 255, 0.18);
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .nav-links a {
+        color: var(--muted);
+        font-size: 14px;
+        padding: 8px 10px;
+        border-radius: 999px;
+      }
+
+      .nav-links a:hover {
+        color: var(--text);
+        background: color-mix(in srgb, var(--card) 70%, transparent);
+      }
+
+      .hero {
+        padding: 64px 0 30px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.3fr 0.9fr;
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      @media (max-width: 900px) {
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--card) 72%, transparent);
+        border: 1px solid var(--stroke);
+        color: var(--muted);
+        font-size: 13px;
+        width: fit-content;
+      }
+
+      .badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+      }
+
+      h1 {
+        margin: 14px 0 10px;
+        font-size: clamp(34px, 4vw, 52px);
+        letter-spacing: -0.03em;
+        line-height: 1.08;
+      }
+
+      .subhead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        max-width: 60ch;
+      }
+
+      .cta-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+        align-items: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--stroke);
+        background: color-mix(in srgb, var(--card) 76%, transparent);
+        color: var(--text);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+        font-weight: 620;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        transition: transform 140ms ease, background 140ms ease;
+        background: color-mix(in srgb, var(--card) 86%, transparent);
+      }
+
+      .btn.primary {
+        border: none;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: rgba(0, 0, 0, 0.9);
+      }
+
+      .fineprint {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .card {
+        border-radius: var(--radius);
+        background: color-mix(in srgb, var(--card) 78%, transparent);
+        border: 1px solid var(--stroke);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-card {
+        padding: 18px;
+        display: grid;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+        min-height: 240px;
+      }
+
+      .mock {
+        border-radius: 18px;
+        border: 1px solid var(--stroke);
+        background: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--card) 92%, transparent),
+            color-mix(in srgb, var(--card) 60%, transparent)
+          );
+        padding: 14px;
+        height: 100%;
+      }
+
+      .mock-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .pill {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--stroke);
+        background: color-mix(in srgb, var(--card) 74%, transparent);
+        width: fit-content;
+      }
+
+      .ring {
+        width: 84px;
+        height: 84px;
+        border-radius: 999px;
+        background:
+          conic-gradient(from 200deg, var(--accent) 0 63%, rgba(255, 255, 255, 0.12) 0 100%);
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--stroke);
+      }
+
+      .ring > div {
+        width: 62px;
+        height: 62px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--bg) 72%, transparent);
+        border: 1px solid var(--stroke);
+        display: grid;
+        place-items: center;
+        font-weight: 680;
+      }
+
+      .mock-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .stat {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid var(--stroke);
+        background: color-mix(in srgb, var(--card) 66%, transparent);
+      }
+
+      .stat .k {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .stat .v {
+        font-size: 16px;
+        margin-top: 2px;
+        font-weight: 680;
+        letter-spacing: -0.01em;
+      }
+
+      section {
+        padding: 26px 0;
+      }
+
+      .section-title {
+        font-size: 20px;
+        letter-spacing: -0.02em;
+        margin: 0 0 10px;
+      }
+
+      .section-subtitle {
+        margin: 0 0 16px;
+        color: var(--muted);
+        max-width: 70ch;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      @media (max-width: 900px) {
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .feature {
+        padding: 16px;
+      }
+
+      .feature h3 {
+        margin: 0 0 6px;
+        font-size: 16px;
+        letter-spacing: -0.01em;
+      }
+
+      .feature p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 12px;
+        align-items: start;
+      }
+
+      @media (max-width: 900px) {
+        .split {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 10px;
+      }
+
+      .list li {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        gap: 10px;
+        align-items: start;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .check {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--accent2) 22%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent2) 40%, var(--stroke));
+        display: grid;
+        place-items: center;
+        color: var(--text);
+        font-size: 12px;
+        line-height: 1;
+        margin-top: 1px;
+      }
+
+      .callout {
+        padding: 16px;
+      }
+
+      .callout strong {
+        font-weight: 720;
+      }
+
+      footer {
+        padding: 26px 0 40px;
+        border-top: 1px solid var(--stroke);
+        margin-top: 10px;
+      }
+
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .small {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .footer-links a {
+        color: var(--muted);
+      }
+
+      .footer-links a:hover {
+        color: var(--text);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="#top" aria-label="Nomodose home">
+          <span class="logo" aria-hidden="true"></span>
+          <span>Nomodose</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href="#privacy">Privacy</a>
+          <a href="mailto:support@nomodose.app">Support</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <div class="container hero">
+        <div class="hero-grid">
+          <div>
+            <div class="badge">
+              <span class="dot" aria-hidden="true"></span>
+              <span>Taper plan & nicotine tracker</span>
+            </div>
+            <h1>Quit snus & smoking — at your own pace.</h1>
+            <p class="subhead">
+              Nomodose builds a personalized taper schedule and helps you log daily use with one tap — so you can cut
+              down gradually and quit for good.
+            </p>
+
+            <div class="cta-row" role="group" aria-label="Primary actions">
+              <a class="btn" href="#features">See features</a>
+              <a class="btn primary" href="mailto:support@nomodose.app">Get support</a>
+              <a class="btn" href="./privacy.html">Privacy policy</a>
+            </div>
+            <div class="fineprint">No account required. Built for adults (17+) in the context of quitting nicotine.</div>
+          </div>
+
+          <div class="card hero-card" aria-label="Preview">
+            <div class="mock" role="img" aria-label="App preview mock">
+              <div class="mock-top">
+                <div class="pill">Today</div>
+                <div class="ring" aria-hidden="true"><div>63%</div></div>
+              </div>
+              <div class="mock-body">
+                <div class="stat">
+                  <div class="k">Daily limit</div>
+                  <div class="v">8</div>
+                </div>
+                <div class="stat">
+                  <div class="k">Logged</div>
+                  <div class="v">5</div>
+                </div>
+                <div class="stat">
+                  <div class="k">Time since last</div>
+                  <div class="v">3h 12m</div>
+                </div>
+                <div class="stat">
+                  <div class="k">Quit date</div>
+                  <div class="v">60 days</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section id="features">
+        <div class="container">
+          <h2 class="section-title">Everything you need to taper with confidence</h2>
+          <p class="section-subtitle">
+            A clear daily plan, fast logging, and insights that keep you moving forward — without making your data public.
+          </p>
+
+          <div class="grid-3">
+            <div class="card feature">
+              <h3>Personalized taper schedule</h3>
+              <p>Daily limits calculated from your baseline and quit date using a smooth taper curve.</p>
+            </div>
+            <div class="card feature">
+              <h3>One‑tap logging</h3>
+              <p>Log each snus pouch or cigarette instantly. Stay aware without friction.</p>
+            </div>
+            <div class="card feature">
+              <h3>Progress at a glance</h3>
+              <p>Dashboard ring, “time since last use”, heatmaps, and charts for real momentum.</p>
+            </div>
+            <div class="card feature">
+              <h3>Reminders & widget</h3>
+              <p>Gentle nudges plus a home screen widget so you can check progress quickly.</p>
+            </div>
+            <div class="card feature">
+              <h3>Dual tracking</h3>
+              <p>Track snus and cigarettes separately or together — whatever matches your journey.</p>
+            </div>
+            <div class="card feature">
+              <h3>Offline & private</h3>
+              <p>All data stays on your device. No account required. Export logs as JSON anytime.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="how">
+        <div class="container split">
+          <div class="card callout">
+            <h2 class="section-title" style="margin-bottom: 6px">How it works</h2>
+            <p class="section-subtitle" style="margin-bottom: 0">
+              Set a goal, follow the daily limit, and keep the streak going — one less pouch, one less cigarette, one day
+              at a time.
+            </p>
+          </div>
+
+          <div class="card callout">
+            <ul class="list">
+              <li><span class="check">✓</span><span><strong>Choose</strong> what you want to quit — snus, cigarettes, or both.</span></li>
+              <li><span class="check">✓</span><span><strong>Enter</strong> your baseline — how many you use per day.</span></li>
+              <li><span class="check">✓</span><span><strong>Pick</strong> a quit date — 30/60/90 days or your own timeline.</span></li>
+              <li><span class="check">✓</span><span><strong>Log</strong> daily use and track limit vs actual over time.</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="privacy">
+        <div class="container">
+          <div class="card callout">
+            <h2 class="section-title">Privacy-first by design</h2>
+            <p class="section-subtitle">
+              Your data is yours. Nomodose is built to work offline and keep logs on-device — no accounts required.
+            </p>
+            <div class="cta-row" role="group" aria-label="Policy links">
+              <a class="btn" href="./privacy.html">Privacy policy</a>
+              <a class="btn" href="./terms.html">Terms</a>
+              <a class="btn" href="mailto:support@nomodose.app">Support</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div class="small">© 2026 Nomodose</div>
+        <div class="footer-links" aria-label="Footer links">
+          <a href="https://nomodose.app" rel="noopener">Website</a>
+          <a href="./privacy.html">Privacy</a>
+          <a href="./terms.html">Terms</a>
+          <a href="mailto:support@nomodose.app">Support</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
